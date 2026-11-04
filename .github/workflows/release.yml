@@ -1,0 +1,101 @@
+# Release flow
+#
+# 1. Every push to main runs release-please. It reads the Conventional Commits since the last
+#    release and keeps a "chore(main): release x.y.z" pull request open, with the version bump
+#    (package.json, Cargo.toml, Cargo.lock) and the new CHANGELOG.md entry.
+# 2. Merging that pull request makes release-please tag vX.Y.Z and publish a GitHub Release.
+# 3. The build job then builds Sentiong on macOS, Windows and Linux and uploads the installers
+#    to that release.
+#
+# Releases created with GITHUB_TOKEN do not trigger other workflows, so the build has to live
+# in this workflow rather than in a separate `on: release` one.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            # One .dmg that runs on both Apple Silicon and Intel Macs.
+            args: --target universal-apple-darwin
+          - platform: windows-latest
+            args: ''
+          - platform: ubuntu-22.04
+            # The oldest supported Ubuntu, so the AppImage/.deb run on older glibc too.
+            args: ''
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Linux dependencies
+        if: ${{ startsWith(matrix.platform, 'ubuntu') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ startsWith(matrix.platform, 'macos') && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - run: pnpm install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS signing + notarization. Uncomment once the Apple Developer ID secrets exist,
+          # and remove `"signingIdentity": "-"` from src-tauri/tauri.conf.json.
+          # See https://v2.tauri.app/distribute/sign/macos/
+          # APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          # APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          # APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ needs.release-please.outputs.tag_name }}
+          releaseName: Sentiong ${{ needs.release-please.outputs.tag_name }}
+          args: ${{ matrix.args }}
+          uploadUpdaterJson: false
