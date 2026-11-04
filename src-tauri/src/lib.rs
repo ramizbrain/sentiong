@@ -19,7 +19,7 @@ use std::sync::Arc;
 
 use paths::SentiongPaths;
 use service::Sentiong;
-use tauri::{Builder, Manager, RunEvent, Runtime, WindowEvent};
+use tauri::{Builder, Manager, Runtime, WindowEvent};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -49,7 +49,7 @@ pub fn run() {
     app.run(|app, event| {
         // Clicking the Dock icon brings the hidden window back.
         #[cfg(target_os = "macos")]
-        if let RunEvent::Reopen { .. } = event {
+        if let tauri::RunEvent::Reopen { .. } = event {
             tray::show_main_window(app);
         }
         #[cfg(not(target_os = "macos"))]
