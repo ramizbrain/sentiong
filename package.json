@@ -1,7 +1,7 @@
 {
   "name": "sentiong",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packageManager": "pnpm@10.30.3",
   "description": "Never commit with the wrong GitHub account again. Profiles for gh, git, SSH keys and commit signing, switched automatically per folder.",
   "license": "MIT",
