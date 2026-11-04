@@ -82,6 +82,11 @@ attaches the macOS, Windows, and Linux installers built by CI.
   that applying twice changes nothing.
 - **Tokens stay in gh.** Never store, log, or send a GitHub token anywhere. Pass it to `gh`
   through `GH_TOKEN` in memory, as `gh.rs` does.
+- **Keep the window locked down.** The CSP in `src-tauri/tauri.conf.json` allows only the
+  app's own scripts. Don't add remote scripts, `eval`, or new remote origins without a good
+  reason, and update `devCsp` along with `csp`.
+- **Pin actions.** Workflows reference every action by commit SHA with the version in a
+  comment (`uses: owner/action@<sha> # v1.2.3`). Dependabot keeps them current.
 - **Change the contract on both sides.** If you change a type in `src-tauri/src/models.rs`,
   update `src/types/sentiong.ts`, the demo backend, and the contract tests in the same PR.
 - **Test behaviour, not implementation.** Rust tests run real `git` in temporary homes
@@ -93,6 +98,9 @@ attaches the macOS, Windows, and Linux installers built by CI.
   or a short recording for UI changes (`pnpm dev` with `?demo=full` is handy for those).
 
 ## Reporting bugs
+
+Security problems are the exception: please report them privately as described in
+[SECURITY.md](SECURITY.md).
 
 Please include your OS, your Git and `gh` versions (`git --version`, `gh --version`), how you
 installed Sentiong, what you expected, and what happened. For "wrong identity" bugs, the output

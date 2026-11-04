@@ -57,7 +57,9 @@ friendly wizard. After that there is nothing to switch.
     another account is active in `gh`.
 - **Wrong-account guard.** An optional global `pre-commit` hook stops a commit when the
   repository's owner belongs to a different profile. Your repositories' own hooks
-  (Husky, Git LFS, …) keep running, and `SENTIONG_SKIP=1 git commit …` lets one through.
+  (Git LFS, …) keep running, and `SENTIONG_SKIP=1 git commit …` lets one through. It is a
+  safety net for honest mistakes, not a lock: a repository that sets its own
+  `core.hooksPath` (Husky 9, for example) skips it.
 - **Setup without the terminal.**
   - **Sign in:** connect another GitHub account in the browser.
   - **Keys:** create an SSH key, upload it to GitHub, and register it for signed commits
@@ -99,6 +101,20 @@ Each profile lives in `~/.config/sentiong/git/profiles/<id>.gitconfig`.
 - New SSH keys are ed25519 keys named `~/.ssh/sentiong_<profile>`, without a passphrase, so
   Git can use them without prompting. Existing files are never overwritten.
 
+### Security
+
+- **No secrets in Sentiong.** Tokens stay in `gh`, there is no telemetry and no server, and
+  the app window runs under a strict Content Security Policy.
+- **GitHub permissions.** Uploading keys needs the `admin:public_key` and
+  `admin:ssh_signing_key` scopes, which also allow deleting keys. Sentiong requests them when
+  you sign in an account through it, or when you first upload a key from an existing `gh`
+  login, and it only ever adds keys.
+- **Verifiable downloads.** Every release ships `SHA256SUMS.txt` and a signed build
+  provenance attestation (see [Verifying a download](#verifying-a-download)).
+
+[SECURITY.md](SECURITY.md) has the details, including the trade-offs, and explains how to
+report a vulnerability privately.
+
 ### Requirements
 
 | Tool | Needed for |
@@ -129,6 +145,18 @@ The builds are not signed with a paid Apple or Microsoft certificate yet:
   app, open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.
   If macOS says the app "is damaged", run `xattr -cr /Applications/Sentiong.app`.
 - **Windows:** if SmartScreen shows "Windows protected your PC", click **More info → Run anyway**.
+
+#### Verifying a download
+
+Because the builds are not code-signed yet, you can check that an installer was built by this
+repository's release workflow, from a specific commit, with the
+[GitHub CLI](https://cli.github.com):
+
+```bash
+gh attestation verify Sentiong_x.y.z_universal.dmg --repo ramizbrain/sentiong
+```
+
+`SHA256SUMS.txt` on the release page lists the SHA-256 checksum of every file.
 
 ### Build from source
 
