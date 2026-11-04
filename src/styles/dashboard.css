@@ -50,6 +50,11 @@
   font-weight: 600;
 }
 
+/* Profile cards and the guard card share a height so the row lines up. */
+.dashboard__columns {
+  --card-min-height: 232px;
+}
+
 .section-title {
   margin: 0 0 14px;
   color: var(--text-muted);
@@ -152,7 +157,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 214px;
+  min-height: var(--card-min-height);
   padding: 18px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
@@ -271,7 +276,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 214px;
+  min-height: var(--card-min-height);
   border: 1.5px dashed rgb(255 255 255 / 14%);
   border-radius: var(--radius-lg);
   background: transparent;
@@ -312,7 +317,10 @@
 
 .guard-card {
   position: relative;
-  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--card-min-height);
+  padding: 18px 20px 20px;
   overflow: hidden;
 }
 
@@ -320,18 +328,18 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 14px;
+  flex: none;
+  width: 44px;
+  height: 44px;
 }
 
 .guard-card__shield {
   position: relative;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
   background: var(--glass-strong);
   color: var(--text-faint);
   transition:
@@ -348,9 +356,9 @@
 
 .guard-card__sonar {
   position: absolute;
-  inset: 4px;
+  inset: 2px;
   border: 1.5px solid rgb(95 224 160 / 55%);
-  border-radius: 20px;
+  border-radius: 14px;
   opacity: 0;
 }
 
@@ -365,19 +373,19 @@
 .guard-card__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   --accent-rgb: 95 224 160;
 }
 
 .guard-card__header h2 {
+  flex: 1;
   margin: 0;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 800;
 }
 
 .guard-card__text {
-  margin: 10px 0 14px;
+  margin: 12px 0;
   color: var(--text-muted);
   font-size: 13.5px;
 }
@@ -385,7 +393,7 @@
 .guard-card__note {
   display: flex;
   gap: 8px;
-  margin: 0;
+  margin: auto 0 0;
   color: var(--text-faint);
   font-size: 12.5px;
 }

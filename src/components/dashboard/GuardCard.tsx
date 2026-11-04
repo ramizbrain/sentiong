@@ -19,19 +19,18 @@ export function GuardCard({ guard, onToggle }: GuardCardProps) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.2 }}
     >
-      <div className="guard-card__visual" aria-hidden="true">
-        <span className="guard-card__sonar" />
-        <span className="guard-card__sonar guard-card__sonar--late" />
-        <motion.span
-          className="guard-card__shield"
-          animate={guard.enabled ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-          transition={{ duration: 2.4, repeat: guard.enabled ? Infinity : 0, ease: "easeInOut" }}
-        >
-          <ShieldIcon size={30} />
-        </motion.span>
-      </div>
-
       <div className="guard-card__header">
+        <div className="guard-card__visual" aria-hidden="true">
+          <span className="guard-card__sonar" />
+          <span className="guard-card__sonar guard-card__sonar--late" />
+          <motion.span
+            className="guard-card__shield"
+            animate={guard.enabled ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+            transition={{ duration: 2.4, repeat: guard.enabled ? Infinity : 0, ease: "easeInOut" }}
+          >
+            <ShieldIcon size={22} />
+          </motion.span>
+        </div>
         <h2>Wrong-account guard</h2>
         <Toggle checked={guard.enabled} onChange={onToggle} label="Wrong-account guard" disabled={blocked} />
       </div>

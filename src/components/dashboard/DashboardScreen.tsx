@@ -101,6 +101,7 @@ export function DashboardScreen({
             </div>
           </section>
           <aside className="dashboard__side">
+            <h2 className="section-title">Protection</h2>
             <GuardCard guard={snapshot.guard} onToggle={onToggleGuard} />
           </aside>
         </div>
